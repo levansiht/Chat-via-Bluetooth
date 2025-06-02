@@ -10,13 +10,11 @@ class DatabaseService {
     name: string | null,
     rssi: number | null,
   ): Promise<Device> {
-    // Check if device already exists
     const existingDevices = await deviceCollection
       .query(Q.where('device_id', deviceId))
       .fetch();
 
     if (existingDevices.length > 0) {
-      // Device exists, update last connected time
       const device = existingDevices[0];
       return await database.write(async () => {
         return await device.update(record => {
@@ -26,7 +24,6 @@ class DatabaseService {
         });
       });
     } else {
-      // Create new device
       return await database.write(async () => {
         return await deviceCollection.create(record => {
           record.deviceId = deviceId;
@@ -78,7 +75,6 @@ class DatabaseService {
     }
   }
 
-  // Message operations
   async saveMessage(
     deviceId: string,
     content: string,

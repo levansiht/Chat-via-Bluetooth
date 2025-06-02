@@ -21,7 +21,6 @@ class ChatService {
     }
 
     try {
-      // Connect to the device
       const connectedDevice = await this.bluetoothService.connectToDevice(
         device.id,
       );
@@ -31,10 +30,8 @@ class ChatService {
         return false;
       }
 
-      // Save device to database
       await DatabaseService.saveDevice(device.id, device.name, device.rssi);
 
-      // Setup message monitoring
       const monitoringSuccess =
         await this.bluetoothService.setupMessageMonitoring(device.id);
 
@@ -43,7 +40,6 @@ class ChatService {
           'Could not setup message monitoring, but connection successful',
         );
       } else {
-        // Add message listener
         this.setupMessageListener(device.id);
       }
 
@@ -57,18 +53,15 @@ class ChatService {
   private setupMessageListener(deviceId: string) {
     if (!this.bluetoothService) return;
 
-    // Prevent duplicate listeners
     if (this.activeListeners.get(deviceId)) {
       return;
     }
 
     this.activeListeners.set(deviceId, true);
 
-    // Add message listener to Bluetooth service
     this.bluetoothService.addMessageListener(
       deviceId,
       async (deviceId, message) => {
-        // When a message is received, save it to the database
         await DatabaseService.saveMessage(deviceId, message, false);
       },
     );
@@ -81,19 +74,15 @@ class ChatService {
     }
 
     try {
-      // First save the message to the database
       await DatabaseService.saveMessage(deviceId, message, true);
 
-      // Then try to send it via Bluetooth
       const success = await this.bluetoothService.sendMessage(
         deviceId,
         message,
       );
 
-      // If sending failed, we could update the message status in the database
       if (!success) {
         console.warn('Failed to send message via Bluetooth');
-        // We could implement status updates here
       }
 
       return success;
@@ -107,11 +96,9 @@ class ChatService {
     if (!this.bluetoothService) return;
 
     try {
-      // Remove active listener
       this.activeListeners.delete(deviceId);
       this.bluetoothService.removeMessageListener(deviceId);
 
-      // Disconnect device
       await this.bluetoothService.disconnectDevice(deviceId);
     } catch (error) {
       console.error('Error disconnecting device:', error);

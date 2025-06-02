@@ -20,11 +20,10 @@ export const MessageSchema = tableSchema({
     {name: 'content', type: 'string'},
     {name: 'is_sent_by_me', type: 'boolean'},
     {name: 'sent_at', type: 'number'},
-    {name: 'status', type: 'string', isOptional: true}, // 'sent', 'delivered', 'read'
+    {name: 'status', type: 'string', isOptional: true}, 
   ],
 });
 
-// Define the schema for the entire database
 export const schema = appSchema({
   version: 1,
   tables: [DeviceSchema, MessageSchema],

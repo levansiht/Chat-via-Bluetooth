@@ -2,14 +2,10 @@ import {BleManager, Device, State, Characteristic} from 'react-native-ble-plx';
 import {PermissionsAndroid, Platform} from 'react-native';
 import {encode, decode} from 'base-64';
 
-// UUID for a standard UART service commonly used in BLE
 const UART_SERVICE_UUID = '6E400001-B5A3-F393-E0A9-E50E24DCCA9E';
-// UUID for RX characteristic (data receiving)
 const UART_RX_CHARACTERISTIC_UUID = '6E400002-B5A3-F393-E0A9-E50E24DCCA9E';
-// UUID for TX characteristic (data sending)
 const UART_TX_CHARACTERISTIC_UUID = '6E400003-B5A3-F393-E0A9-E50E24DCCA9E';
 
-// Safe encode/decode functions with error handling
 function safeEncode(str: string): string {
   try {
     return encode(str);
@@ -44,7 +40,6 @@ class BluetoothService {
     this.deviceCharacteristics = new Map();
   }
 
-  // Check and request necessary permissions for Android
   async requestPermissions(): Promise<boolean> {
     if (Platform.OS === 'android') {
       const apiLevel = parseInt(Platform.Version.toString(), 10);
@@ -62,7 +57,6 @@ class BluetoothService {
         );
         return granted === PermissionsAndroid.RESULTS.GRANTED;
       } else {
-        // Android 12+ requires BLUETOOTH_SCAN and BLUETOOTH_CONNECT
         const scanGranted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
           {
@@ -92,13 +86,11 @@ class BluetoothService {
     return true; // iOS doesn't need this type of permission
   }
 
-  // Check if Bluetooth is enabled
   async isBluetoothEnabled(): Promise<boolean> {
     const state = await this.manager.state();
     return state === State.PoweredOn;
   }
 
-  // Start scanning for devices
   startScan(onDeviceFound: (device: Device) => void): void {
     this.manager.startDeviceScan(
       null, // Scan for all services
@@ -110,7 +102,6 @@ class BluetoothService {
         }
 
         if (device && device.name) {
-          // Only return devices with a name
           this.devices.set(device.id, device);
           onDeviceFound(device);
         }
@@ -118,12 +109,10 @@ class BluetoothService {
     );
   }
 
-  // Stop scanning
   stopScan(): void {
     this.manager.stopDeviceScan();
   }
 
-  // Connect to a specific device
   async connectToDevice(deviceId: string): Promise<Device | null> {
     try {
       const device = await this.manager.connectToDevice(deviceId);
@@ -135,10 +124,8 @@ class BluetoothService {
     }
   }
 
-  // Disconnect from a device
   async disconnectDevice(deviceId: string): Promise<void> {
     try {
-      // Clean up any message subscriptions
       this.messageListeners.delete(deviceId);
       this.deviceCharacteristics.delete(deviceId);
 
@@ -148,18 +135,15 @@ class BluetoothService {
     }
   }
 
-  // Get all discovered devices
   getDevices(): Device[] {
     return Array.from(this.devices.values());
   }
 
-  // Clean up resources
   destroy(): void {
     this.stopScan();
     this.manager.destroy();
   }
 
-  // Add a message listener for a specific device
   addMessageListener(
     deviceId: string,
     listener: (deviceId: string, message: string) => void,
@@ -167,12 +151,10 @@ class BluetoothService {
     this.messageListeners.set(deviceId, listener);
   }
 
-  // Remove a message listener for a specific device
   removeMessageListener(deviceId: string): void {
     this.messageListeners.delete(deviceId);
   }
 
-  // Setup message monitoring for a device
   async setupMessageMonitoring(deviceId: string): Promise<boolean> {
     try {
       const device = this.devices.get(deviceId);
@@ -182,7 +164,6 @@ class BluetoothService {
         return false;
       }
 
-      // Check if the device supports the UART service
       const services = await device.services();
       const uartService = services.find(
         service =>
@@ -192,9 +173,7 @@ class BluetoothService {
       if (!uartService) {
         console.warn('UART service not found on device');
         return false;
-      }
-
-      // Get the TX characteristic (device -> phone)
+      } // Get the TX characteristic (device -> phone)
       const characteristics = await uartService.characteristics();
       const txCharacteristic = characteristics.find(
         char =>
@@ -206,10 +185,8 @@ class BluetoothService {
         return false;
       }
 
-      // Store the characteristic for later use
       this.deviceCharacteristics.set(deviceId, txCharacteristic);
 
-      // Monitor for incoming messages
       device.monitorCharacteristicForService(
         uartService.uuid,
         txCharacteristic.uuid,
@@ -237,7 +214,6 @@ class BluetoothService {
     }
   }
 
-  // Send a message to a connected device
   async sendMessage(deviceId: string, message: string): Promise<boolean> {
     try {
       const device = this.devices.get(deviceId);
@@ -247,7 +223,6 @@ class BluetoothService {
         return false;
       }
 
-      // Check if the device supports the UART service
       const services = await device.services();
       const uartService = services.find(
         service =>
@@ -259,7 +234,6 @@ class BluetoothService {
         return false;
       }
 
-      // Get the RX characteristic (phone -> device)
       const characteristics = await uartService.characteristics();
       const rxCharacteristic = characteristics.find(
         char =>
@@ -271,14 +245,12 @@ class BluetoothService {
         return false;
       }
 
-      // Encode message to base64
       const base64Message = safeEncode(message);
 
       if (!base64Message) {
         return false;
       }
 
-      // Write the message to the characteristic
       await device.writeCharacteristicWithResponseForService(
         uartService.uuid,
         rxCharacteristic.uuid,

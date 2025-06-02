@@ -14,7 +14,6 @@ const adapter = new SQLiteAdapter({
   // migrations: [],
   // Optional: synchronous mode only works on Android
   jsi: Platform.OS === 'android',
-  // Makes debugging easier - disable for production
   onSetUpError: error => {
     console.error('Database setup error:', error);
   },

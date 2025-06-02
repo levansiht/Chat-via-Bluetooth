@@ -6,7 +6,6 @@ import {
 } from 'react-native-ble-plx';
 import {Platform} from 'react-native';
 
-// Create our own MockDevice class that doesn't extend Device
 class MockDevice {
   id: string;
   name: string;
@@ -19,24 +18,19 @@ class MockDevice {
     this.rssi = rssi;
   }
 
-  // Implement as a function that returns a Promise<boolean>
   isConnected(): Promise<boolean> {
     return Promise.resolve(this._isConnected);
   }
 
-  // Return this as Device type by casting
   async connect(options?: ConnectionOptions): Promise<Device> {
     this._isConnected = true;
-    // Simulate connection delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     return this as unknown as Device;
   }
 
-  // Return this as Device type by casting
   async discoverAllServicesAndCharacteristics(
     transactionId?: string,
   ): Promise<Device> {
-    // Simulate discovery delay
     await new Promise(resolve => setTimeout(resolve, 1500));
     return this as unknown as Device;
   }
@@ -52,7 +46,6 @@ class MockBluetoothService {
     (deviceId: string, message: string) => void
   > = new Map();
 
-  // For simulating auto-replies
   private autoReplyMessages: string[] = [
     'Hello there!',
     'Nice to meet you',
@@ -65,9 +58,7 @@ class MockBluetoothService {
     'Operation successful',
     'Standing by for instructions',
   ];
-
   constructor() {
-    // Initialize mock devices
     this.mockDevices = [
       new MockDevice('00:11:22:33:44:55', 'Mock iPhone', -65),
       new MockDevice('AA:BB:CC:DD:EE:FF', 'Mock Android', -72),
@@ -78,13 +69,11 @@ class MockBluetoothService {
   }
 
   async requestPermissions(): Promise<boolean> {
-    // Mock always returns true for permissions
     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
     return true;
   }
 
   async isBluetoothEnabled(): Promise<boolean> {
-    // Mock always returns true for Bluetooth enabled
     await new Promise(resolve => setTimeout(resolve, 300)); // Simulate delay
     return true;
   }
@@ -93,9 +82,7 @@ class MockBluetoothService {
     this.isScanningActive = true;
     this.scanCallback = onDeviceFound;
 
-    // Simulate device discovery with random delays
     this.mockDevices.forEach((device, index) => {
-      // Discover devices one by one with delays
       setTimeout(() => {
         if (this.isScanningActive && this.scanCallback) {
           this.scanCallback(device as unknown as Device);
@@ -103,7 +90,6 @@ class MockBluetoothService {
       }, 1000 + Math.random() * 3000 + index * 1000);
     });
 
-    // Simulate occasional new device discovery
     this.scanInterval = setInterval(() => {
       if (!this.isScanningActive) {
         if (this.scanInterval) {

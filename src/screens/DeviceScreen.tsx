@@ -38,10 +38,8 @@ const DeviceScreen = () => {
   const {deviceId, deviceName} = route.params;
 
   useEffect(() => {
-    // Check connection status when component mounts
     checkConnectionStatus();
 
-    // Set up navigation header
     navigation.setOptions({
       title: deviceName || 'Connected Device',
       headerRight: () => (
@@ -49,7 +47,6 @@ const DeviceScreen = () => {
       ),
     });
 
-    // Clean up when component unmounts
     return () => {
       if (isConnected) {
         bluetoothService.disconnectDevice(deviceId);
@@ -58,8 +55,6 @@ const DeviceScreen = () => {
   }, [bluetoothService]);
 
   const checkConnectionStatus = async () => {
-    // Here you could add code to periodically check if device is still connected
-    // For now, we'll assume it's connected since we've just connected to it
   };
 
   const handleDisconnect = async () => {
@@ -84,13 +79,10 @@ const DeviceScreen = () => {
     setIsLoading(true);
 
     try {
-      // Set up chat service
       ChatService.setBluetoothService(bluetoothService);
 
-      // Set up message monitoring on the device
       await bluetoothService.setupMessageMonitoring(deviceId);
 
-      // Navigate to chat screen
       navigation.navigate('ChatScreen', {
         deviceId,
         deviceName,

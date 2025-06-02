@@ -43,10 +43,8 @@ const ChatScreen = () => {
   const {deviceId, deviceName} = route.params;
 
   useEffect(() => {
-    // Set the chat service with the current bluetooth service
     ChatService.setBluetoothService(bluetoothService);
 
-    // Set up the navigation header
     navigation.setOptions({
       title: deviceName || 'Chat',
       headerRight: () => (
@@ -71,13 +69,10 @@ const ChatScreen = () => {
       ),
     });
 
-    // Load chat history
     loadMessages();
 
-    // Set up subscription for new messages
     setupMessageSubscription();
 
-    // Clean up when unmounting
     return () => {
       bluetoothService.removeMessageListener(deviceId);
     };
@@ -90,7 +85,6 @@ const ChatScreen = () => {
       setMessages(chatHistory);
       setIsLoading(false);
 
-      // Scroll to bottom after loading messages
       setTimeout(() => {
         if (chatHistory.length > 0 && flatListRef.current) {
           flatListRef.current.scrollToEnd({animated: false});
@@ -103,21 +97,17 @@ const ChatScreen = () => {
   };
 
   const setupMessageSubscription = () => {
-    // Set up listener for new messages from the device
     bluetoothService.addMessageListener(
       deviceId,
       async (deviceId, messageText) => {
-        // Save the message to database
         const newMessage = await DatabaseService.saveMessage(
           deviceId,
           messageText,
           false,
         );
 
-        // Update the UI
         setMessages(prevMessages => [...prevMessages, newMessage]);
 
-        // Scroll to bottom
         setTimeout(() => {
           if (flatListRef.current) {
             flatListRef.current.scrollToEnd({animated: true});
@@ -134,7 +124,6 @@ const ChatScreen = () => {
     setInputMessage('');
 
     try {
-      // Save and send the message
       const success = await ChatService.sendMessage(deviceId, messageToSend);
 
       if (!success && !useMockService) {
@@ -144,7 +133,6 @@ const ChatScreen = () => {
         );
       }
 
-      // Reload messages to display the sent message
       loadMessages();
     } catch (error) {
       console.error('Error sending message:', error);
@@ -162,7 +150,6 @@ const ChatScreen = () => {
     }
   };
 
-  // Group messages by date
   const groupedMessages = () => {
     const groups: {[date: string]: Message[]} = {};
 
@@ -174,7 +161,6 @@ const ChatScreen = () => {
       groups[date].push(message);
     });
 
-    // Convert groups to array for FlatList
     return Object.entries(groups).map(([date, messages]) => ({
       date,
       messages,
