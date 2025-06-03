@@ -19,40 +19,33 @@ import {RootStackParamList} from '../navigation';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-// We need to extend Device for type safety with mock devices
-type ExtendedDevice = Device | any; // Using 'any' here to handle mock device properties
-
+type ExtendedDevice = Device | any; 
 const ScanScreen = () => {
   const [devices, setDevices] = useState<ExtendedDevice[]>([]);
   const [scanning, setScanning] = useState<boolean>(false);
   const [bluetoothEnabled, setBluetoothEnabled] = useState<boolean>(false);
   const navigation = useNavigation<NavigationProp>();
 
-  // Use our bluetooth context
   const {bluetoothService, useMockService, toggleMockService} =
     useBluetoothService();
 
   useEffect(() => {
     checkBluetoothStatus();
     return () => {
-      // Clean up when component unmounts
       bluetoothService.stopScan();
     };
   }, [bluetoothService]);
 
   const checkBluetoothStatus = async () => {
     try {
-      // Reset devices when switching services
       setDevices([]);
 
-      // Request necessary permissions
       const permissionsGranted = await bluetoothService.requestPermissions();
       if (!permissionsGranted) {
         Alert.alert('Permission Error', 'Bluetooth permissions not granted');
         return;
       }
 
-      // Check if Bluetooth is enabled
       const enabled = await bluetoothService.isBluetoothEnabled();
       setBluetoothEnabled(enabled);
 
@@ -69,12 +62,10 @@ const ScanScreen = () => {
   };
 
   const startScan = () => {
-    // Clear previously found devices
     setDevices([]);
     setScanning(true);
 
     bluetoothService.startScan((device: ExtendedDevice) => {
-      // Add the device if it doesn't already exist in the list
       setDevices(prevDevices => {
         const deviceExists = prevDevices.some(d => d.id === device.id);
         if (!deviceExists) {
@@ -84,7 +75,6 @@ const ScanScreen = () => {
       });
     });
 
-    // Stop scan after 10 seconds
     setTimeout(() => {
       if (scanning) {
         stopScan();
@@ -99,7 +89,7 @@ const ScanScreen = () => {
 
   const connectToDevice = async (device: ExtendedDevice) => {
     try {
-      stopScan(); // Stop scanning before connecting
+      stopScan(); 
 
       Alert.alert('Connect', `Connect to ${device.name || 'Unknown Device'}?`, [
         {text: 'Cancel', style: 'cancel'},
@@ -110,7 +100,6 @@ const ScanScreen = () => {
               device.id,
             );
             if (connectedDevice) {
-              // Navigate to device screen with the connected device
               navigation.navigate('DeviceScreen', {
                 deviceId: device.id,
                 deviceName: device.name || 'Unknown Device',
@@ -165,12 +154,10 @@ const ScanScreen = () => {
           <Switch
             value={useMockService}
             onValueChange={() => {
-              // Stop scanning before switching services
               if (scanning) {
                 stopScan();
               }
               toggleMockService();
-              // Check status after switching
               setTimeout(checkBluetoothStatus, 100);
             }}
           />

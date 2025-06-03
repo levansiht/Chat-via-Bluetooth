@@ -83,7 +83,7 @@ class BluetoothService {
         );
       }
     }
-    return true; // iOS doesn't need this type of permission
+    return true; 
   }
 
   async isBluetoothEnabled(): Promise<boolean> {
@@ -93,7 +93,7 @@ class BluetoothService {
 
   startScan(onDeviceFound: (device: Device) => void): void {
     this.manager.startDeviceScan(
-      null, // Scan for all services
+      null, 
       {allowDuplicates: false},
       (error, device) => {
         if (error) {
@@ -173,7 +173,7 @@ class BluetoothService {
       if (!uartService) {
         console.warn('UART service not found on device');
         return false;
-      } // Get the TX characteristic (device -> phone)
+      } 
       const characteristics = await uartService.characteristics();
       const txCharacteristic = characteristics.find(
         char =>

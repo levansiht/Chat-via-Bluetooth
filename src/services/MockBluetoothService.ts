@@ -126,13 +126,11 @@ class MockBluetoothService {
     const device = this.mockDevices.find(d => d.id === deviceId);
 
     if (!device) {
-      // Simulate connection failure occasionally
       if (Math.random() > 0.9) {
         await new Promise(resolve => setTimeout(resolve, 2000));
         return null;
       }
 
-      // Create a new mock device if it's a random device
       const newDevice = new MockDevice(
         deviceId,
         `Device ${deviceId.substring(0, 5)}`,
@@ -155,10 +153,8 @@ class MockBluetoothService {
       device._isConnected = false;
     }
 
-    // Clean up message listeners
     this.messageListeners.delete(deviceId);
 
-    // Simulate disconnect delay
     await new Promise(resolve => setTimeout(resolve, 800));
   }
 
@@ -170,8 +166,6 @@ class MockBluetoothService {
     this.stopScan();
     this.messageListeners.clear();
   }
-
-  // Message-related methods to match the real Bluetooth service
 
   addMessageListener(
     deviceId: string,
@@ -185,16 +179,13 @@ class MockBluetoothService {
   }
 
   async setupMessageMonitoring(deviceId: string): Promise<boolean> {
-    // Always succeed for mock devices
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate setup delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
     return true;
   }
 
   async sendMessage(deviceId: string, message: string): Promise<boolean> {
-    // Simulate sending message with delay
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Simulate auto-reply after a random delay (1-3 seconds)
     setTimeout(() => {
       const listener = this.messageListeners.get(deviceId);
       if (listener) {

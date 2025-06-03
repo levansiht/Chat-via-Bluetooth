@@ -25,7 +25,6 @@ export const BluetoothProvider: React.FC<{children: ReactNode}> = ({
     setUseMockService(prev => !prev);
   };
 
-  // Context value
   const contextValue: BluetoothContextType = {
     bluetoothService,
     useMockService,
