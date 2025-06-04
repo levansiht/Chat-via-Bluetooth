@@ -17,24 +17,36 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Navigation = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="ScanScreen">
+      <Stack.Navigator
+        initialRouteName="ScanScreen"
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: '#667eea',
+          },
+          headerTintColor: '#ffffff',
+          headerTitleStyle: {
+            fontWeight: '600',
+            fontSize: 18,
+          },
+          headerShadowVisible: true,
+        }}>
         <Stack.Screen
           name="ScanScreen"
           component={ScanScreen}
-          options={{title: 'BLE Scanner'}}
+          options={{title: '🔍 Bluetooth Scanner'}}
         />
         <Stack.Screen
           name="DeviceScreen"
           component={DeviceScreen}
           options={({route}) => ({
-            title: route.params.deviceName || 'Connected Device',
+            title: `📱 ${route.params.deviceName || 'Connected Device'}`,
           })}
         />
         <Stack.Screen
           name="ChatScreen"
           component={ChatScreen}
           options={({route}) => ({
-            title: `Chat with ${route.params.deviceName || 'Device'}`,
+            title: `💬 ${route.params.deviceName || 'Device'}`,
           })}
         />
       </Stack.Navigator>

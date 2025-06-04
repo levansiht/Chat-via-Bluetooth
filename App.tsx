@@ -25,7 +25,7 @@ function App(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" backgroundColor="#667eea" />
       <BluetoothProvider>
         <Navigation />
       </BluetoothProvider>
@@ -36,7 +36,7 @@ function App(): React.JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#f7fafc',
   },
 });
 

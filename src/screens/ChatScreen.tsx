@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -171,14 +172,31 @@ const ChatScreen = () => {
   };
 
   const renderMessage = ({item}: {item: Message}) => {
+    if (item.isSentByMe) {
+      return (
+        <LinearGradient
+          colors={['#667eea', '#764ba2']}
+          style={[styles.messageContainer, styles.sentMessage]}
+          start={{x: 0, y: 0}}
+          end={{x: 1, y: 0}}>
+          <Text style={[styles.messageText, styles.sentMessageText]}>
+            {item.content}
+          </Text>
+          <Text style={[styles.messageTime, styles.sentMessageTime]}>
+            {item.formattedTime}
+          </Text>
+        </LinearGradient>
+      );
+    }
+
     return (
-      <View
-        style={[
-          styles.messageContainer,
-          item.isSentByMe ? styles.sentMessage : styles.receivedMessage,
-        ]}>
-        <Text style={styles.messageText}>{item.content}</Text>
-        <Text style={styles.messageTime}>{item.formattedTime}</Text>
+      <View style={[styles.messageContainer, styles.receivedMessage]}>
+        <Text style={[styles.messageText, styles.receivedMessageText]}>
+          {item.content}
+        </Text>
+        <Text style={[styles.messageTime, styles.receivedMessageTime]}>
+          {item.formattedTime}
+        </Text>
       </View>
     );
   };
@@ -222,10 +240,11 @@ const ChatScreen = () => {
         contentContainerStyle={styles.messagesListContent}>
         {groupedMessages().length === 0 ? (
           <View style={styles.emptyChat}>
-            <Icon name="chat-bubble-outline" size={64} color="#CCCCCC" />
-            <Text style={styles.emptyChatText}>No messages yet</Text>
+            <Icon name="chat-bubble-outline" size={80} color="#cbd5e0" />
+            <Text style={styles.emptyChatText}>Ready to Chat! 💬</Text>
             <Text style={styles.emptyChatSubtext}>
-              Start the conversation by sending a message
+              Send your first message to start the conversation with this
+              Bluetooth device.
             </Text>
           </View>
         ) : (
@@ -240,24 +259,32 @@ const ChatScreen = () => {
           style={styles.input}
           value={inputMessage}
           onChangeText={setInputMessage}
-          placeholder="Type a message..."
-          placeholderTextColor="#999"
+          placeholder="Type your message..."
+          placeholderTextColor="#a0aec0"
           returnKeyType="send"
           onSubmitEditing={sendMessage}
           blurOnSubmit={false}
+          multiline
         />
-        <TouchableOpacity
-          style={[
-            styles.sendButton,
-            !inputMessage.trim() && styles.sendButtonDisabled,
-          ]}
-          onPress={sendMessage}
-          disabled={!inputMessage.trim()}>
-          <Icon
-            name="send"
-            size={24}
-            color={inputMessage.trim() ? '#FFFFFF' : '#AAAAAA'}
-          />
+        <TouchableOpacity onPress={sendMessage} disabled={!inputMessage.trim()}>
+          <LinearGradient
+            colors={
+              inputMessage.trim()
+                ? ['#667eea', '#764ba2']
+                : ['#cbd5e0', '#a0aec0']
+            }
+            style={[
+              styles.sendButton,
+              !inputMessage.trim() && styles.sendButtonDisabled,
+            ]}
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 1}}>
+            <Icon
+              name="send"
+              size={24}
+              color={inputMessage.trim() ? '#FFFFFF' : '#718096'}
+            />
+          </LinearGradient>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -267,7 +294,7 @@ const ChatScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#f7fafc',
   },
   loadingContainer: {
     justifyContent: 'center',
@@ -276,7 +303,8 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#666',
+    color: '#718096',
+    fontWeight: '500',
   },
   messagesList: {
     flex: 1,
@@ -286,92 +314,130 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   messageContainer: {
-    maxWidth: '80%',
-    padding: 12,
-    borderRadius: 16,
-    marginVertical: 4,
+    maxWidth: '75%',
+    padding: 16,
+    borderRadius: 20,
+    marginVertical: 3,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   sentMessage: {
     alignSelf: 'flex-end',
-    backgroundColor: '#0B93F6',
-    borderBottomRightRadius: 4,
+    borderBottomRightRadius: 6,
+    marginLeft: 60,
   },
   receivedMessage: {
     alignSelf: 'flex-start',
-    backgroundColor: '#E5E5EA',
-    borderBottomLeftRadius: 4,
+    backgroundColor: '#ffffff',
+    borderBottomLeftRadius: 6,
+    marginRight: 60,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   messageText: {
     fontSize: 16,
-    color: '#FFFFFF',
+    lineHeight: 22,
+  },
+  sentMessageText: {
+    color: '#ffffff',
+  },
+  receivedMessageText: {
+    color: '#2d3748',
   },
   messageTime: {
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 11,
+    marginTop: 6,
+    fontWeight: '500',
+  },
+  sentMessageTime: {
+    color: 'rgba(255, 255, 255, 0.8)',
     alignSelf: 'flex-end',
-    marginTop: 4,
+  },
+  receivedMessageTime: {
+    color: '#a0aec0',
+    alignSelf: 'flex-end',
   },
   inputContainer: {
     flexDirection: 'row',
-    padding: 10,
+    padding: 16,
     backgroundColor: 'white',
     borderTopWidth: 1,
-    borderTopColor: '#E5E5E5',
+    borderTopColor: '#e2e8f0',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: -2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
   },
   input: {
     flex: 1,
-    backgroundColor: '#F0F0F0',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    backgroundColor: '#f7fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 25,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     fontSize: 16,
-    color: '#333',
-    marginRight: 8,
+    color: '#2d3748',
+    marginRight: 12,
+    maxHeight: 100,
   },
   sendButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#0B93F6',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#667eea',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
   },
   sendButtonDisabled: {
-    backgroundColor: '#DDDDDD',
+    backgroundColor: '#cbd5e0',
+    shadowOpacity: 0,
+    elevation: 0,
   },
   headerButton: {
     marginRight: 16,
+    padding: 8,
   },
   dateSeparator: {
     alignItems: 'center',
-    margin: 16,
+    marginVertical: 20,
   },
   dateSeparatorText: {
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    color: '#666',
+    backgroundColor: 'rgba(113, 128, 150, 0.1)',
+    color: '#718096',
     fontSize: 12,
-    fontWeight: 'bold',
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: 16,
+    fontWeight: '600',
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: 20,
   },
   emptyChat: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 32,
+    padding: 40,
   },
   emptyChatText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#666',
-    marginTop: 16,
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#4a5568',
+    marginTop: 20,
+    textAlign: 'center',
   },
   emptyChatSubtext: {
-    fontSize: 14,
-    color: '#999',
+    fontSize: 16,
+    color: '#718096',
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: 12,
+    lineHeight: 24,
   },
 });
 

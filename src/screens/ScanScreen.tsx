@@ -7,8 +7,8 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
-  Button,
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useBluetoothService} from '../services/BluetoothProvider';
@@ -134,21 +134,39 @@ const ScanScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>BLE Devices</Text>
+      <LinearGradient
+        colors={['#667eea', '#764ba2']}
+        style={styles.header}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}>
+        <Text style={styles.title}>🔍 Bluetooth Discovery</Text>
         <View style={styles.statusContainer}>
           <Text style={styles.statusText}>
-            Bluetooth: {bluetoothEnabled ? 'Enabled' : 'Disabled'}
+            {bluetoothEnabled ? '✅ Bluetooth Ready' : '❌ Bluetooth Disabled'}
           </Text>
         </View>
-      </View>
+      </LinearGradient>
 
       <View style={styles.optionsContainer}>
-        <Button
-          title={scanning ? 'Stop Scan' : 'Scan for Devices'}
+        <TouchableOpacity
           onPress={scanning ? stopScan : startScan}
-          disabled={!bluetoothEnabled}
-        />
+          disabled={!bluetoothEnabled}>
+          <LinearGradient
+            colors={
+              scanning
+                ? ['#e53e3e', '#c53030']
+                : bluetoothEnabled
+                ? ['#667eea', '#764ba2']
+                : ['#a0aec0', '#718096']
+            }
+            style={[styles.scanButton]}
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 0}}>
+            <Text style={styles.scanButtonText}>
+              {scanning ? '⏹️ Stop Scanning' : '🔍 Start Scanning'}
+            </Text>
+          </LinearGradient>
+        </TouchableOpacity>
       </View>
 
       {scanning && (
@@ -162,8 +180,8 @@ const ScanScreen = () => {
         {devices.length === 0 ? (
           <Text style={styles.emptyList}>
             {scanning
-              ? 'Searching for devices...'
-              : 'No devices found. Tap "Scan for Devices" to start scanning.'}
+              ? '🔍 Searching for nearby devices...\nMake sure your target device is discoverable!'
+              : '📱 No devices found yet.\n\nTap "Start Scanning" to discover Bluetooth devices in your area.'}
           </Text>
         ) : (
           devices.map((item, index) => (
@@ -192,86 +210,122 @@ const ScanScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f7fafc',
   },
   header: {
-    padding: 16,
-    backgroundColor: '#4285F4',
+    padding: 20,
+    backgroundColor: '#667eea',
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontWeight: '700',
     color: 'white',
+    textAlign: 'center',
   },
   statusContainer: {
-    marginTop: 4,
+    marginTop: 8,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
   },
   statusText: {
-    color: 'white',
+    color: 'rgba(255, 255, 255, 0.9)',
     fontSize: 14,
+    fontWeight: '500',
   },
   optionsContainer: {
-    padding: 16,
+    padding: 20,
   },
-  scanButtonContainer: {
-    margin: 16,
+  scanButton: {
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 16,
+    shadowColor: '#667eea',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  scanButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   scanningContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
-    marginTop: 16,
+    marginTop: 8,
+    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+    marginHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 12,
   },
   scanningText: {
     marginLeft: 8,
     fontSize: 14,
-    color: '#333',
+    color: '#667eea',
+    fontWeight: '500',
   },
   deviceItem: {
     flexDirection: 'row',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    padding: 20,
+    marginHorizontal: 16,
+    marginVertical: 6,
     backgroundColor: 'white',
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'space-between',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   deviceInfo: {
     flex: 1,
   },
   deviceName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#2d3748',
+    marginBottom: 4,
   },
   deviceId: {
     fontSize: 12,
-    color: '#666',
-    marginTop: 4,
+    color: '#718096',
+    marginBottom: 2,
   },
   deviceRssi: {
     fontSize: 12,
-    color: '#666',
-    marginTop: 2,
+    color: '#4a5568',
+    fontWeight: '500',
   },
   connectButton: {
-    backgroundColor: '#4285F4',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 4,
+    backgroundColor: '#48bb78',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    shadowColor: '#48bb78',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
   },
   connectButtonText: {
     color: 'white',
-    fontWeight: 'bold',
+    fontWeight: '600',
+    fontSize: 14,
   },
   emptyList: {
     textAlign: 'center',
-    marginTop: 50,
-    color: '#666',
+    marginTop: 60,
+    color: '#718096',
+    fontSize: 16,
+    paddingHorizontal: 40,
+    lineHeight: 24,
   },
 });
 
