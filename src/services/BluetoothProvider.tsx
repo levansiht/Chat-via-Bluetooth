@@ -1,11 +1,8 @@
-import React, {createContext, useState, useContext, ReactNode} from 'react';
-import RealBluetoothService from './BluetoothService';
-import MockBluetoothService from './MockBluetoothService';
+import React, {createContext, useContext, ReactNode} from 'react';
+import BluetoothService from './BluetoothService';
 
 interface BluetoothContextType {
-  bluetoothService: typeof RealBluetoothService | typeof MockBluetoothService;
-  useMockService: boolean;
-  toggleMockService: () => void;
+  bluetoothService: typeof BluetoothService;
 }
 
 const BluetoothContext = createContext<BluetoothContextType | undefined>(
@@ -15,20 +12,8 @@ const BluetoothContext = createContext<BluetoothContextType | undefined>(
 export const BluetoothProvider: React.FC<{children: ReactNode}> = ({
   children,
 }) => {
-  const [useMockService, setUseMockService] = useState<boolean>(false);
-
-  const bluetoothService = useMockService
-    ? MockBluetoothService
-    : RealBluetoothService;
-
-  const toggleMockService = () => {
-    setUseMockService(prev => !prev);
-  };
-
   const contextValue: BluetoothContextType = {
-    bluetoothService,
-    useMockService,
-    toggleMockService,
+    bluetoothService: BluetoothService,
   };
 
   return (

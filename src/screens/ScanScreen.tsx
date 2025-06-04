@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   Alert,
   Button,
-  Switch,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -28,8 +27,7 @@ const ScanScreen = () => {
   const [bluetoothEnabled, setBluetoothEnabled] = useState<boolean>(false);
   const navigation = useNavigation<NavigationProp>();
 
-  const {bluetoothService, useMockService, toggleMockService} =
-    useBluetoothService();
+  const {bluetoothService} = useBluetoothService();
 
   // Create a function to ensure devices are plain objects
   const createPlainDevice = (device: any): ExtendedDevice => {
@@ -55,7 +53,7 @@ const ScanScreen = () => {
       const enabled = await bluetoothService.isBluetoothEnabled();
       setBluetoothEnabled(enabled);
 
-      if (!enabled && !useMockService) {
+      if (!enabled) {
         Alert.alert(
           'Bluetooth Disabled',
           'Please enable Bluetooth to use this feature',
@@ -65,7 +63,7 @@ const ScanScreen = () => {
       console.error('Failed to check Bluetooth status:', error);
       Alert.alert('Error', 'Failed to initialize Bluetooth');
     }
-  }, [bluetoothService, useMockService]);
+  }, [bluetoothService]);
 
   useEffect(() => {
     checkBluetoothStatus();
@@ -140,34 +138,16 @@ const ScanScreen = () => {
         <Text style={styles.title}>BLE Devices</Text>
         <View style={styles.statusContainer}>
           <Text style={styles.statusText}>
-            Bluetooth:{' '}
-            {bluetoothEnabled || useMockService ? 'Enabled' : 'Disabled'}
+            Bluetooth: {bluetoothEnabled ? 'Enabled' : 'Disabled'}
           </Text>
-          {useMockService && (
-            <Text style={[styles.statusText, styles.mockText]}>MOCK MODE</Text>
-          )}
         </View>
       </View>
 
       <View style={styles.optionsContainer}>
-        <View style={styles.mockToggle}>
-          <Text style={styles.mockToggleText}>Use Mock Devices</Text>
-          <Switch
-            value={useMockService}
-            onValueChange={() => {
-              if (scanning) {
-                stopScan();
-              }
-              toggleMockService();
-              setTimeout(checkBluetoothStatus, 100);
-            }}
-          />
-        </View>
-
         <Button
           title={scanning ? 'Stop Scan' : 'Scan for Devices'}
           onPress={scanning ? stopScan : startScan}
-          disabled={!bluetoothEnabled && !useMockService}
+          disabled={!bluetoothEnabled}
         />
       </View>
 
@@ -233,34 +213,8 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 14,
   },
-  mockText: {
-    fontWeight: 'bold',
-    backgroundColor: '#FFC107',
-    color: '#000',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
-  },
   optionsContainer: {
     padding: 16,
-  },
-  mockToggle: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-    backgroundColor: 'white',
-    padding: 12,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  mockToggleText: {
-    fontSize: 16,
-    color: '#333',
   },
   scanButtonContainer: {
     margin: 16,

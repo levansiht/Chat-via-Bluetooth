@@ -33,7 +33,7 @@ const DeviceScreen = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const route = useRoute<DeviceScreenRouteProp>();
   const navigation = useNavigation<NavigationProp>();
-  const {bluetoothService, useMockService} = useBluetoothService();
+  const {bluetoothService} = useBluetoothService();
 
   const {deviceId, deviceName} = route.params;
 
@@ -109,11 +109,6 @@ const DeviceScreen = () => {
       <ScrollView>
         <View style={styles.infoCard}>
           <Text style={styles.cardTitle}>Device Information</Text>
-          {useMockService && (
-            <View style={styles.mockBadge}>
-              <Text style={styles.mockBadgeText}>MOCK DEVICE</Text>
-            </View>
-          )}
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Name:</Text>
             <Text style={styles.infoValue}>{deviceName || 'Unknown'}</Text>
@@ -190,20 +185,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
     position: 'relative',
-  },
-  mockBadge: {
-    position: 'absolute',
-    right: 16,
-    top: 16,
-    backgroundColor: '#FFC107',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
-  },
-  mockBadgeText: {
-    color: '#000',
-    fontWeight: 'bold',
-    fontSize: 12,
   },
   cardTitle: {
     fontSize: 18,

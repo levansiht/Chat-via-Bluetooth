@@ -62,23 +62,6 @@ This application requires Bluetooth permissions:
 
 - NSBluetoothAlwaysUsageDescription (in Info.plist)
 
-## Mock Device Testing
-
-The app includes a mock device testing feature that allows you to simulate Bluetooth devices without needing physical hardware. This is useful for:
-
-- Development without physical devices
-- Testing UI flows without Bluetooth hardware
-- Demo purposes
-
-To use the mock device feature:
-
-1. Launch the app
-2. Toggle the "Use Mock Devices" switch to ON
-3. Tap "Scan for Devices" to see simulated devices appear
-4. Connect to these virtual devices as you would with real ones
-
-Mock mode is clearly indicated with a "MOCK MODE" label in the app to avoid confusion.
-
 ## Troubleshooting
 
 - Make sure Bluetooth is enabled on your device
@@ -96,8 +79,7 @@ BleChatApp/
 │   │   └── DeviceScreen.tsx   # Connected device screen
 │   ├── services/         # Business logic
 │   │   ├── BluetoothService.ts # BLE functionality
-│   │   ├── MockBluetoothService.ts # Mock implementation for testing
-│   │   └── BluetoothProvider.tsx # Provider to switch between real/mock modes
+│   │   └── BluetoothProvider.tsx # Provider for Bluetooth functionality
 │   └── navigation.tsx    # Navigation configuration
 ├── App.tsx              # Main application component
 └── ...                  # Other configuration files

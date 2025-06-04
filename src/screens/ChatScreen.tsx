@@ -39,7 +39,7 @@ const ChatScreen = () => {
   const scrollViewRef = useRef<ScrollView>(null);
   const route = useRoute<ChatScreenRouteProp>();
   const navigation = useNavigation<NavigationProp>();
-  const {bluetoothService, useMockService} = useBluetoothService();
+  const {bluetoothService} = useBluetoothService();
   const {deviceId, deviceName} = route.params;
 
   useEffect(() => {
@@ -129,7 +129,7 @@ const ChatScreen = () => {
     try {
       const success = await ChatService.sendMessage(deviceId, messageToSend);
 
-      if (!success && !useMockService) {
+      if (!success) {
         Alert.alert(
           'Error',
           'Failed to send message. Please check device connection.',
@@ -216,14 +216,6 @@ const ChatScreen = () => {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}>
-      {useMockService && (
-        <View style={styles.mockBanner}>
-          <Text style={styles.mockBannerText}>
-            MOCK MODE - Auto-replies enabled
-          </Text>
-        </View>
-      )}
-
       <ScrollView
         ref={scrollViewRef}
         style={styles.messagesList}
@@ -380,15 +372,6 @@ const styles = StyleSheet.create({
     color: '#999',
     textAlign: 'center',
     marginTop: 8,
-  },
-  mockBanner: {
-    backgroundColor: '#FFC107',
-    padding: 8,
-    alignItems: 'center',
-  },
-  mockBannerText: {
-    color: '#000',
-    fontWeight: 'bold',
   },
 });
 
