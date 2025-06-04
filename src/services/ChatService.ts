@@ -51,7 +51,9 @@ class ChatService {
   }
 
   private setupMessageListener(deviceId: string) {
-    if (!this.bluetoothService) return;
+    if (!this.bluetoothService) {
+      return;
+    }
 
     if (this.activeListeners.get(deviceId)) {
       return;
@@ -61,8 +63,8 @@ class ChatService {
 
     this.bluetoothService.addMessageListener(
       deviceId,
-      async (deviceId, message) => {
-        await DatabaseService.saveMessage(deviceId, message, false);
+      async (receivedDeviceId: string, message: string) => {
+        await DatabaseService.saveMessage(receivedDeviceId, message, false);
       },
     );
   }
@@ -93,7 +95,9 @@ class ChatService {
   }
 
   async disconnectDevice(deviceId: string): Promise<void> {
-    if (!this.bluetoothService) return;
+    if (!this.bluetoothService) {
+      return;
+    }
 
     try {
       this.activeListeners.delete(deviceId);

@@ -19,8 +19,12 @@ class DatabaseService {
       return await database.write(async () => {
         return await device.update(record => {
           record.lastConnectedAt = new Date();
-          if (name) record.name = name;
-          if (rssi !== null) record.rssi = rssi;
+          if (name) {
+            record.name = name;
+          }
+          if (rssi !== null) {
+            record.rssi = rssi;
+          }
         });
       });
     } else {
@@ -30,7 +34,9 @@ class DatabaseService {
           record.name = name || 'Unknown Device';
           record.lastConnectedAt = new Date();
           record.createdAt = new Date();
-          if (rssi !== null) record.rssi = rssi;
+          if (rssi !== null) {
+            record.rssi = rssi;
+          }
         });
       });
     }

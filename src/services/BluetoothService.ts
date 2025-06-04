@@ -83,7 +83,7 @@ class BluetoothService {
         );
       }
     }
-    return true; 
+    return true;
   }
 
   async isBluetoothEnabled(): Promise<boolean> {
@@ -93,7 +93,7 @@ class BluetoothService {
 
   startScan(onDeviceFound: (device: Device) => void): void {
     this.manager.startDeviceScan(
-      null, 
+      null,
       {allowDuplicates: false},
       (error, device) => {
         if (error) {
@@ -169,11 +169,10 @@ class BluetoothService {
         service =>
           service.uuid.toLowerCase() === UART_SERVICE_UUID.toLowerCase(),
       );
-
       if (!uartService) {
         console.warn('UART service not found on device');
         return false;
-      } 
+      }
       const characteristics = await uartService.characteristics();
       const txCharacteristic = characteristics.find(
         char =>

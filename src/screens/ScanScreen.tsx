@@ -1,17 +1,15 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
-  FlatList,
+  ScrollView,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
   Alert,
   Button,
-  Platform,
   Switch,
 } from 'react-native';
-import {Device} from 'react-native-ble-plx';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useBluetoothService} from '../services/BluetoothProvider';
@@ -19,7 +17,11 @@ import {RootStackParamList} from '../navigation';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-type ExtendedDevice = Device | any; 
+interface ExtendedDevice {
+  id: string;
+  name?: string;
+  rssi?: number;
+}
 const ScanScreen = () => {
   const [devices, setDevices] = useState<ExtendedDevice[]>([]);
   const [scanning, setScanning] = useState<boolean>(false);
@@ -29,14 +31,18 @@ const ScanScreen = () => {
   const {bluetoothService, useMockService, toggleMockService} =
     useBluetoothService();
 
-  useEffect(() => {
-    checkBluetoothStatus();
-    return () => {
-      bluetoothService.stopScan();
-    };
-  }, [bluetoothService]);
+  // Create a function to ensure devices are plain objects
+  const createPlainDevice = (device: any): ExtendedDevice => {
+    return JSON.parse(
+      JSON.stringify({
+        id: String(device?.id || `device-${Date.now()}-${Math.random()}`),
+        name: String(device?.name || 'Unknown Device'),
+        rssi: Number(device?.rssi || -100),
+      }),
+    );
+  };
 
-  const checkBluetoothStatus = async () => {
+  const checkBluetoothStatus = useCallback(async () => {
     try {
       setDevices([]);
 
@@ -59,17 +65,29 @@ const ScanScreen = () => {
       console.error('Failed to check Bluetooth status:', error);
       Alert.alert('Error', 'Failed to initialize Bluetooth');
     }
-  };
+  }, [bluetoothService, useMockService]);
+
+  useEffect(() => {
+    checkBluetoothStatus();
+    return () => {
+      bluetoothService.stopScan();
+    };
+  }, [bluetoothService, checkBluetoothStatus]);
 
   const startScan = () => {
     setDevices([]);
     setScanning(true);
 
-    bluetoothService.startScan((device: ExtendedDevice) => {
+    bluetoothService.startScan((device: any) => {
       setDevices(prevDevices => {
-        const deviceExists = prevDevices.some(d => d.id === device.id);
+        // Create a completely plain object using JSON serialization
+        const normalizedDevice = createPlainDevice(device);
+
+        const deviceExists = prevDevices.some(
+          d => d.id === normalizedDevice.id,
+        );
         if (!deviceExists) {
-          return [...prevDevices, device];
+          return [...prevDevices, normalizedDevice];
         }
         return prevDevices;
       });
@@ -89,7 +107,7 @@ const ScanScreen = () => {
 
   const connectToDevice = async (device: ExtendedDevice) => {
     try {
-      stopScan(); 
+      stopScan();
 
       Alert.alert('Connect', `Connect to ${device.name || 'Unknown Device'}?`, [
         {text: 'Cancel', style: 'cancel'},
@@ -114,23 +132,6 @@ const ScanScreen = () => {
       console.error('Connection error:', error);
       Alert.alert('Connection Error', 'Failed to connect to device');
     }
-  };
-
-  const renderDeviceItem = ({item}: {item: ExtendedDevice}) => {
-    return (
-      <TouchableOpacity
-        style={styles.deviceItem}
-        onPress={() => connectToDevice(item)}>
-        <View style={styles.deviceInfo}>
-          <Text style={styles.deviceName}>{item.name || 'Unknown Device'}</Text>
-          <Text style={styles.deviceId}>ID: {item.id}</Text>
-          <Text style={styles.deviceRssi}>Signal: {item.rssi} dBm</Text>
-        </View>
-        <View style={styles.connectButton}>
-          <Text style={styles.connectButtonText}>Connect</Text>
-        </View>
-      </TouchableOpacity>
-    );
   };
 
   return (
@@ -177,18 +178,33 @@ const ScanScreen = () => {
         </View>
       )}
 
-      <FlatList
-        data={devices}
-        keyExtractor={item => item.id}
-        renderItem={renderDeviceItem}
-        ListEmptyComponent={
+      <ScrollView style={styles.container}>
+        {devices.length === 0 ? (
           <Text style={styles.emptyList}>
             {scanning
               ? 'Searching for devices...'
               : 'No devices found. Tap "Scan for Devices" to start scanning.'}
           </Text>
-        }
-      />
+        ) : (
+          devices.map((item, index) => (
+            <TouchableOpacity
+              key={`device-${index}`}
+              style={styles.deviceItem}
+              onPress={() => connectToDevice(item)}>
+              <View style={styles.deviceInfo}>
+                <Text style={styles.deviceName}>
+                  {item.name || 'Unknown Device'}
+                </Text>
+                <Text style={styles.deviceId}>ID: {item.id}</Text>
+                <Text style={styles.deviceRssi}>Signal: {item.rssi} dBm</Text>
+              </View>
+              <View style={styles.connectButton}>
+                <Text style={styles.connectButtonText}>Connect</Text>
+              </View>
+            </TouchableOpacity>
+          ))
+        )}
+      </ScrollView>
     </View>
   );
 };

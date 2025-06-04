@@ -20,7 +20,7 @@ export const MessageSchema = tableSchema({
     {name: 'content', type: 'string'},
     {name: 'is_sent_by_me', type: 'boolean'},
     {name: 'sent_at', type: 'number'},
-    {name: 'status', type: 'string', isOptional: true}, 
+    {name: 'status', type: 'string', isOptional: true},
   ],
 });
 

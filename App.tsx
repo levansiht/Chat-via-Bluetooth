@@ -8,7 +8,6 @@
 import React, {useEffect} from 'react';
 import {SafeAreaView, StatusBar, StyleSheet, LogBox} from 'react-native';
 import Navigation from './src/navigation';
-import {Platform} from 'react-native';
 import {BluetoothProvider} from './src/services/BluetoothProvider';
 
 // Ignore specific warnings that might come from react-native-ble-plx

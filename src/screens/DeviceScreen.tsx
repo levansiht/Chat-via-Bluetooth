@@ -52,10 +52,10 @@ const DeviceScreen = () => {
         bluetoothService.disconnectDevice(deviceId);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bluetoothService]);
 
-  const checkConnectionStatus = async () => {
-  };
+  const checkConnectionStatus = async () => {};
 
   const handleDisconnect = async () => {
     setIsLoading(true);
@@ -127,7 +127,9 @@ const DeviceScreen = () => {
             <Text
               style={[
                 styles.infoValue,
-                {color: isConnected ? '#5cb85c' : '#d9534f'},
+                isConnected
+                  ? styles.connectedStatus
+                  : styles.disconnectedStatus,
               ]}>
               {isConnected ? 'Connected' : 'Disconnected'}
             </Text>
@@ -274,6 +276,12 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#e0e0e0',
     backgroundColor: 'white',
+  },
+  connectedStatus: {
+    color: '#5cb85c',
+  },
+  disconnectedStatus: {
+    color: '#d9534f',
   },
 });
 

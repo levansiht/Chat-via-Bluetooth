@@ -3,7 +3,7 @@ import {
   View,
   Text,
   TextInput,
-  FlatList,
+  ScrollView,
   TouchableOpacity,
   StyleSheet,
   KeyboardAvoidingView,
@@ -36,7 +36,7 @@ const ChatScreen = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const flatListRef = useRef<FlatList>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
   const route = useRoute<ChatScreenRouteProp>();
   const navigation = useNavigation<NavigationProp>();
   const {bluetoothService, useMockService} = useBluetoothService();
@@ -76,6 +76,7 @@ const ChatScreen = () => {
     return () => {
       bluetoothService.removeMessageListener(deviceId);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deviceId, bluetoothService]);
 
   const loadMessages = async () => {
@@ -86,8 +87,8 @@ const ChatScreen = () => {
       setIsLoading(false);
 
       setTimeout(() => {
-        if (chatHistory.length > 0 && flatListRef.current) {
-          flatListRef.current.scrollToEnd({animated: false});
+        if (chatHistory.length > 0 && scrollViewRef.current) {
+          scrollViewRef.current.scrollToEnd({animated: false});
         }
       }, 200);
     } catch (error) {
@@ -99,9 +100,9 @@ const ChatScreen = () => {
   const setupMessageSubscription = () => {
     bluetoothService.addMessageListener(
       deviceId,
-      async (deviceId, messageText) => {
+      async (receivedDeviceId, messageText) => {
         const newMessage = await DatabaseService.saveMessage(
-          deviceId,
+          receivedDeviceId,
           messageText,
           false,
         );
@@ -109,8 +110,8 @@ const ChatScreen = () => {
         setMessages(prevMessages => [...prevMessages, newMessage]);
 
         setTimeout(() => {
-          if (flatListRef.current) {
-            flatListRef.current.scrollToEnd({animated: true});
+          if (scrollViewRef.current) {
+            scrollViewRef.current.scrollToEnd({animated: true});
           }
         }, 100);
       },
@@ -118,7 +119,9 @@ const ChatScreen = () => {
   };
 
   const sendMessage = async () => {
-    if (!inputMessage.trim()) return;
+    if (!inputMessage.trim()) {
+      return;
+    }
 
     const messageToSend = inputMessage.trim();
     setInputMessage('');
@@ -161,9 +164,9 @@ const ChatScreen = () => {
       groups[date].push(message);
     });
 
-    return Object.entries(groups).map(([date, messages]) => ({
+    return Object.entries(groups).map(([date, groupMessages]) => ({
       date,
-      messages,
+      messages: groupMessages,
     }));
   };
 
@@ -182,7 +185,7 @@ const ChatScreen = () => {
 
   const renderDateSeparator = ({
     date,
-    messages,
+    messages: groupMessages,
   }: {
     date: string;
     messages: Message[];
@@ -192,7 +195,7 @@ const ChatScreen = () => {
         <View style={styles.dateSeparator}>
           <Text style={styles.dateSeparatorText}>{date}</Text>
         </View>
-        {messages.map(message => (
+        {groupMessages.map(message => (
           <View key={message.id}>{renderMessage({item: message})}</View>
         ))}
       </View>
@@ -221,14 +224,11 @@ const ChatScreen = () => {
         </View>
       )}
 
-      <FlatList
-        ref={flatListRef}
+      <ScrollView
+        ref={scrollViewRef}
         style={styles.messagesList}
-        data={groupedMessages()}
-        keyExtractor={item => item.date}
-        renderItem={({item}) => renderDateSeparator(item)}
-        contentContainerStyle={styles.messagesListContent}
-        ListEmptyComponent={
+        contentContainerStyle={styles.messagesListContent}>
+        {groupedMessages().length === 0 ? (
           <View style={styles.emptyChat}>
             <Icon name="chat-bubble-outline" size={64} color="#CCCCCC" />
             <Text style={styles.emptyChatText}>No messages yet</Text>
@@ -236,8 +236,12 @@ const ChatScreen = () => {
               Start the conversation by sending a message
             </Text>
           </View>
-        }
-      />
+        ) : (
+          groupedMessages().map(item => (
+            <View key={item.date}>{renderDateSeparator(item)}</View>
+          ))
+        )}
+      </ScrollView>
 
       <View style={styles.inputContainer}>
         <TextInput

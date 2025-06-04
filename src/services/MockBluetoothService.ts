@@ -1,10 +1,4 @@
-import {
-  Device,
-  Characteristic,
-  Service,
-  ConnectionOptions,
-} from 'react-native-ble-plx';
-import {Platform} from 'react-native';
+import {Device, ConnectionOptions} from 'react-native-ble-plx';
 
 class MockDevice {
   id: string;
@@ -22,14 +16,14 @@ class MockDevice {
     return Promise.resolve(this._isConnected);
   }
 
-  async connect(options?: ConnectionOptions): Promise<Device> {
+  async connect(_options?: ConnectionOptions): Promise<Device> {
     this._isConnected = true;
     await new Promise(resolve => setTimeout(resolve, 1000));
     return this as unknown as Device;
   }
 
   async discoverAllServicesAndCharacteristics(
-    transactionId?: string,
+    _transactionId?: string,
   ): Promise<Device> {
     await new Promise(resolve => setTimeout(resolve, 1500));
     return this as unknown as Device;
@@ -85,7 +79,13 @@ class MockBluetoothService {
     this.mockDevices.forEach((device, index) => {
       setTimeout(() => {
         if (this.isScanningActive && this.scanCallback) {
-          this.scanCallback(device as unknown as Device);
+          // Create a plain object to avoid property configuration issues
+          const plainDevice = {
+            id: device.id,
+            name: device.name,
+            rssi: device.rssi,
+          };
+          this.scanCallback(plainDevice as unknown as Device);
         }
       }, 1000 + Math.random() * 3000 + index * 1000);
     });
@@ -102,12 +102,12 @@ class MockBluetoothService {
       const shouldAddRandomDevice = Math.random() > 0.7;
       if (shouldAddRandomDevice && this.scanCallback) {
         const randomId = Math.random().toString(16).substring(2, 10);
-        const newDevice = new MockDevice(
-          `${randomId}:${randomId}`,
-          `Random Device ${Math.floor(Math.random() * 100)}`,
-          -55 - Math.floor(Math.random() * 40),
-        );
-        this.scanCallback(newDevice as unknown as Device);
+        const plainRandomDevice = {
+          id: `${randomId}:${randomId}`,
+          name: `Random Device ${Math.floor(Math.random() * 100)}`,
+          rssi: -55 - Math.floor(Math.random() * 40),
+        };
+        this.scanCallback(plainRandomDevice as unknown as Device);
       }
     }, 4000);
   }
@@ -178,12 +178,12 @@ class MockBluetoothService {
     this.messageListeners.delete(deviceId);
   }
 
-  async setupMessageMonitoring(deviceId: string): Promise<boolean> {
+  async setupMessageMonitoring(_deviceId: string): Promise<boolean> {
     await new Promise(resolve => setTimeout(resolve, 1000));
     return true;
   }
 
-  async sendMessage(deviceId: string, message: string): Promise<boolean> {
+  async sendMessage(deviceId: string, _message: string): Promise<boolean> {
     await new Promise(resolve => setTimeout(resolve, 500));
 
     setTimeout(() => {

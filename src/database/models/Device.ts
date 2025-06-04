@@ -1,11 +1,5 @@
 import {Model} from '@nozbe/watermelondb';
-import {
-  field,
-  date,
-  readonly,
-  text,
-  children,
-} from '@nozbe/watermelondb/decorators';
+import {field, date, readonly, text} from '@nozbe/watermelondb/decorators';
 import {Associations} from '@nozbe/watermelondb/Model';
 
 export default class Device extends Model {

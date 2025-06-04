@@ -3,7 +3,6 @@ import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite';
 import {schema} from './schema';
 import {Device, Message} from './models';
 import {Platform} from 'react-native';
-import {appSchema} from '@nozbe/watermelondb';
 
 // Create the adapter
 const adapter = new SQLiteAdapter({
