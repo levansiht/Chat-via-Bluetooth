@@ -32,12 +32,20 @@ class BluetoothService {
     (deviceId: string, message: string) => void
   >;
   private deviceCharacteristics: Map<string, Characteristic>;
+  private bluetoothStateListeners: Set<(state: boolean) => void>;
 
   constructor() {
     this.manager = new BleManager();
     this.devices = new Map();
     this.messageListeners = new Map();
     this.deviceCharacteristics = new Map();
+    this.bluetoothStateListeners = new Set();
+
+    // Monitor Bluetooth state changes
+    this.manager.onStateChange(state => {
+      const isEnabled = state === State.PoweredOn;
+      this.bluetoothStateListeners.forEach(listener => listener(isEnabled));
+    });
   }
 
   async requestPermissions(): Promise<boolean> {
@@ -153,6 +161,31 @@ class BluetoothService {
 
   removeMessageListener(deviceId: string): void {
     this.messageListeners.delete(deviceId);
+  }
+
+  addBluetoothStateListener(listener: (state: boolean) => void): void {
+    this.bluetoothStateListeners.add(listener);
+  }
+
+  removeBluetoothStateListener(listener: (state: boolean) => void): void {
+    this.bluetoothStateListeners.delete(listener);
+  }
+
+  async startScanWithValidation(
+    onDeviceFound: (device: Device) => void,
+  ): Promise<boolean> {
+    const permissionsGranted = await this.requestPermissions();
+    if (!permissionsGranted) {
+      throw new Error('Bluetooth permissions not granted');
+    }
+
+    const isEnabled = await this.isBluetoothEnabled();
+    if (!isEnabled) {
+      throw new Error('Bluetooth is not enabled');
+    }
+
+    this.startScan(onDeviceFound);
+    return true;
   }
 
   async setupMessageMonitoring(deviceId: string): Promise<boolean> {

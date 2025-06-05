@@ -25,11 +25,11 @@ const ScanScreen = () => {
   const [devices, setDevices] = useState<ExtendedDevice[]>([]);
   const [scanning, setScanning] = useState<boolean>(false);
   const [bluetoothEnabled, setBluetoothEnabled] = useState<boolean>(false);
+  const [bluetoothChecking, setBluetoothChecking] = useState<boolean>(true);
   const navigation = useNavigation<NavigationProp>();
 
   const {bluetoothService} = useBluetoothService();
 
-  // Create a function to ensure devices are plain objects
   const createPlainDevice = (device: any): ExtendedDevice => {
     return JSON.parse(
       JSON.stringify({
@@ -43,15 +43,18 @@ const ScanScreen = () => {
   const checkBluetoothStatus = useCallback(async () => {
     try {
       setDevices([]);
+      setBluetoothChecking(true);
 
       const permissionsGranted = await bluetoothService.requestPermissions();
       if (!permissionsGranted) {
         Alert.alert('Permission Error', 'Bluetooth permissions not granted');
+        setBluetoothChecking(false);
         return;
       }
 
       const enabled = await bluetoothService.isBluetoothEnabled();
       setBluetoothEnabled(enabled);
+      setBluetoothChecking(false);
 
       if (!enabled) {
         Alert.alert(
@@ -62,45 +65,93 @@ const ScanScreen = () => {
     } catch (error) {
       console.error('Failed to check Bluetooth status:', error);
       Alert.alert('Error', 'Failed to initialize Bluetooth');
+      setBluetoothChecking(false);
     }
+  }, [bluetoothService]);
+  const stopScan = useCallback(() => {
+    bluetoothService.stopScan();
+    setScanning(false);
   }, [bluetoothService]);
 
   useEffect(() => {
     checkBluetoothStatus();
+
+    const handleBluetoothStateChange = (isEnabled: boolean) => {
+      setBluetoothEnabled(isEnabled);
+      if (!isEnabled && scanning) {
+        stopScan();
+        Alert.alert(
+          'Bluetooth Disabled',
+          'Bluetooth was turned off. Scanning stopped.',
+        );
+      }
+    };
+
+    bluetoothService.addBluetoothStateListener(handleBluetoothStateChange);
+
     return () => {
       bluetoothService.stopScan();
+      bluetoothService.removeBluetoothStateListener(handleBluetoothStateChange);
     };
-  }, [bluetoothService, checkBluetoothStatus]);
+  }, [bluetoothService, checkBluetoothStatus, scanning, stopScan]);
 
-  const startScan = () => {
-    setDevices([]);
-    setScanning(true);
+  const startScan = async () => {
+    try {
+      setDevices([]);
 
-    bluetoothService.startScan((device: any) => {
-      setDevices(prevDevices => {
-        // Create a completely plain object using JSON serialization
-        const normalizedDevice = createPlainDevice(device);
-
-        const deviceExists = prevDevices.some(
-          d => d.id === normalizedDevice.id,
-        );
-        if (!deviceExists) {
-          return [...prevDevices, normalizedDevice];
-        }
-        return prevDevices;
+      await bluetoothService.startScanWithValidation((device: any) => {
+        setDevices(prevDevices => {
+          const normalizedDevice = createPlainDevice(device);
+          const deviceExists = prevDevices.some(
+            d => d.id === normalizedDevice.id,
+          );
+          if (!deviceExists) {
+            return [...prevDevices, normalizedDevice];
+          }
+          return prevDevices;
+        });
       });
-    });
 
-    setTimeout(() => {
-      if (scanning) {
-        stopScan();
+      setScanning(true);
+
+      setTimeout(() => {
+        if (scanning) {
+          stopScan();
+        }
+      }, 10000);
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message.includes('Bluetooth is not enabled')) {
+          Alert.alert(
+            'Bluetooth Disabled',
+            'Please enable Bluetooth first before scanning for devices.',
+            [
+              {text: 'OK', style: 'default'},
+              {
+                text: 'Check Again',
+                onPress: checkBluetoothStatus,
+                style: 'default',
+              },
+            ],
+          );
+        } else if (error.message.includes('permissions not granted')) {
+          Alert.alert(
+            'Permission Required',
+            'Bluetooth permissions are required to scan for devices.',
+            [
+              {text: 'OK', style: 'default'},
+              {
+                text: 'Try Again',
+                onPress: checkBluetoothStatus,
+                style: 'default',
+              },
+            ],
+          );
+        } else {
+          Alert.alert('Error', `Failed to start scanning: ${error.message}`);
+        }
       }
-    }, 10000);
-  };
-
-  const stopScan = () => {
-    bluetoothService.stopScan();
-    setScanning(false);
+    }
   };
 
   const connectToDevice = async (device: ExtendedDevice) => {
@@ -142,7 +193,11 @@ const ScanScreen = () => {
         <Text style={styles.title}>🔍 Bluetooth Discovery</Text>
         <View style={styles.statusContainer}>
           <Text style={styles.statusText}>
-            {bluetoothEnabled ? '✅ Bluetooth Ready' : '❌ Bluetooth Disabled'}
+            {bluetoothChecking
+              ? '🔄 Checking Bluetooth...'
+              : bluetoothEnabled
+              ? '✅ Bluetooth Ready'
+              : '❌ Bluetooth Not Ready'}
           </Text>
         </View>
       </LinearGradient>
