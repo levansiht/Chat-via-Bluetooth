@@ -13,6 +13,15 @@ import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useBluetoothService} from '../services/BluetoothProvider';
 import {RootStackParamList} from '../navigation';
+import {
+  COLORS,
+  SPACING,
+  BORDER_RADIUS,
+  FONT_SIZES,
+  FONT_WEIGHTS,
+  SHADOWS,
+  GRADIENTS,
+} from '../constants';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -186,7 +195,7 @@ const ScanScreen = () => {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#667eea', '#764ba2']}
+        colors={GRADIENTS.primary}
         style={styles.header}
         start={{x: 0, y: 0}}
         end={{x: 1, y: 1}}>
@@ -209,10 +218,10 @@ const ScanScreen = () => {
           <LinearGradient
             colors={
               scanning
-                ? ['#e53e3e', '#c53030']
+                ? GRADIENTS.error
                 : bluetoothEnabled
-                ? ['#667eea', '#764ba2']
-                : ['#a0aec0', '#718096']
+                ? GRADIENTS.primary
+                : GRADIENTS.disabled
             }
             style={[styles.scanButton]}
             start={{x: 0, y: 0}}
@@ -226,7 +235,7 @@ const ScanScreen = () => {
 
       {scanning && (
         <View style={styles.scanningContainer}>
-          <ActivityIndicator size="small" color="#0000ff" />
+          <ActivityIndicator size="small" color={COLORS.blue} />
           <Text style={styles.scanningText}>Scanning for devices...</Text>
         </View>
       )}
@@ -265,122 +274,122 @@ const ScanScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f7fafc',
+    backgroundColor: COLORS.background,
   },
   header: {
-    padding: 20,
-    backgroundColor: '#667eea',
+    padding: SPACING.xxl,
+    backgroundColor: COLORS.primary,
   },
   title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: 'white',
+    fontSize: FONT_SIZES.xl,
+    fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.white,
     textAlign: 'center',
   },
   statusContainer: {
-    marginTop: 8,
+    marginTop: SPACING.md,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
   statusText: {
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontSize: 14,
-    fontWeight: '500',
+    color: COLORS.whiteTransparent,
+    fontSize: FONT_SIZES.sm,
+    fontWeight: FONT_WEIGHTS.normal,
   },
   optionsContainer: {
-    padding: 20,
+    padding: SPACING.xxl,
   },
   scanButton: {
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 16,
-    shadowColor: '#667eea',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    paddingVertical: SPACING.xl,
+    paddingHorizontal: SPACING.xxxl,
+    borderRadius: BORDER_RADIUS.md,
+    shadowColor: COLORS.primary,
+    shadowOffset: SHADOWS.medium.shadowOffset,
+    shadowOpacity: SHADOWS.medium.shadowOpacity,
+    shadowRadius: SHADOWS.medium.shadowRadius,
+    elevation: SHADOWS.medium.elevation,
   },
   scanButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
+    color: COLORS.white,
+    fontSize: FONT_SIZES.md,
+    fontWeight: FONT_WEIGHTS.semibold,
     textAlign: 'center',
   },
   scanningContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
-    marginTop: 8,
-    backgroundColor: 'rgba(102, 126, 234, 0.1)',
-    marginHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 12,
+    marginBottom: SPACING.xl,
+    marginTop: SPACING.md,
+    backgroundColor: COLORS.primaryWithOpacity,
+    marginHorizontal: SPACING.xxl,
+    paddingVertical: SPACING.lg,
+    borderRadius: BORDER_RADIUS.sm,
   },
   scanningText: {
-    marginLeft: 8,
-    fontSize: 14,
-    color: '#667eea',
-    fontWeight: '500',
+    marginLeft: SPACING.md,
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.primary,
+    fontWeight: FONT_WEIGHTS.normal,
   },
   deviceItem: {
     flexDirection: 'row',
-    padding: 20,
-    marginHorizontal: 16,
+    padding: SPACING.xxl,
+    marginHorizontal: SPACING.xl,
     marginVertical: 6,
-    backgroundColor: 'white',
-    borderRadius: 16,
+    backgroundColor: COLORS.white,
+    borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
     justifyContent: 'space-between',
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowColor: COLORS.shadow,
+    shadowOffset: SHADOWS.light.shadowOffset,
+    shadowOpacity: SHADOWS.light.shadowOpacity,
+    shadowRadius: SHADOWS.light.shadowRadius,
+    elevation: SHADOWS.light.elevation,
   },
   deviceInfo: {
     flex: 1,
   },
   deviceName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#2d3748',
-    marginBottom: 4,
+    fontSize: FONT_SIZES.lg,
+    fontWeight: FONT_WEIGHTS.semibold,
+    color: COLORS.text.primary,
+    marginBottom: SPACING.sm,
   },
   deviceId: {
-    fontSize: 12,
-    color: '#718096',
-    marginBottom: 2,
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.text.secondary,
+    marginBottom: SPACING.xs,
   },
   deviceRssi: {
-    fontSize: 12,
-    color: '#4a5568',
-    fontWeight: '500',
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.text.tertiary,
+    fontWeight: FONT_WEIGHTS.normal,
   },
   connectButton: {
-    backgroundColor: '#48bb78',
+    backgroundColor: COLORS.status.success,
     paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    shadowColor: '#48bb78',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: BORDER_RADIUS.sm,
+    shadowColor: COLORS.status.success,
+    shadowOffset: SHADOWS.colored.shadowOffset,
+    shadowOpacity: SHADOWS.colored.shadowOpacity,
+    shadowRadius: SHADOWS.colored.shadowRadius,
+    elevation: SHADOWS.colored.elevation,
   },
   connectButtonText: {
-    color: 'white',
-    fontWeight: '600',
-    fontSize: 14,
+    color: COLORS.white,
+    fontWeight: FONT_WEIGHTS.semibold,
+    fontSize: FONT_SIZES.sm,
   },
   emptyList: {
     textAlign: 'center',
-    marginTop: 60,
-    color: '#718096',
-    fontSize: 16,
-    paddingHorizontal: 40,
-    lineHeight: 24,
+    marginTop: SPACING.massive,
+    color: COLORS.text.secondary,
+    fontSize: FONT_SIZES.md,
+    paddingHorizontal: SPACING.huge,
+    lineHeight: SPACING.xxxl,
   },
 });
 
